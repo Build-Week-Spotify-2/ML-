@@ -1,6 +1,6 @@
 from methods import methods
 from pdb import set_trace as st
-
+import pandas as pd
 
 def predict(song_id_list, recommendation_count):
 
@@ -23,7 +23,10 @@ def predict(song_id_list, recommendation_count):
         spotipy_obj
     )
 
-    output_df = methods.get_songs_audio_features(similar_song_id_list, spotipy_obj)
+    # st()
+    output_df = methods.get_songs_audio_features(similar_song_id_list, spotipy_obj)   
+    output_df["song_id"] = similar_song_id_list
+    # output_df = 
 
     return output_df
 
