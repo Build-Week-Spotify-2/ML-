@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 from dotenv import load_dotenv
-
 from pdb import set_trace as st
 
 
@@ -16,16 +15,12 @@ def predict(song_id_list, recommendation_count):
         import spotipy
         import spotipy.util as util
         import sys
-        
+
         load_dotenv()
         SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
         SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
         SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
         USERNAME = os.getenv("USERNAME")
-        # SPOTIPY_CLIENT_ID = '87d5ab3264f5406cb565552216721155'
-        # SPOTIPY_CLIENT_SECRET = 'de9f2fcefcdb4fcea3923fb0fe2a088a'
-        # SPOTIPY_REDIRECT_URI = 'http://google.com/'
-        # USERNAME = "2d8351ybzd0df9csxzcs7unh6"
 
         token = util.prompt_for_user_token(
             username=USERNAME,
@@ -33,7 +28,7 @@ def predict(song_id_list, recommendation_count):
             client_secret=SPOTIPY_CLIENT_SECRET,
             redirect_uri=SPOTIPY_REDIRECT_URI
         )
-        # token = util.prompt_for_user_token(username, scope)
+
         sp = spotipy.Spotify(auth=token)
         return sp
 
@@ -82,9 +77,13 @@ def predict(song_id_list, recommendation_count):
         return:
             list of recommended song ids
         '''
-        
-        # spotipy_obj.
 
+        same_cluster_songs = \
+            labled_songs[labled_songs["label"] == song_label]\
+            .loc[:, "track_id"]
+
+        list_of_recommended_songs = same_cluster_songs.head(n).to_list()
+        return list_of_recommended_songs
 
     def main(song_id_list, recommendation_count):
         # get spotipy token
@@ -100,15 +99,15 @@ def predict(song_id_list, recommendation_count):
         average_song_features = input_songs_audio_features.mean()
         average_song_cluster_label = kmeans_model.predict([average_song_features])
         similar_song_id_list = get_n_similar_songs(
-            average_song_cluster_label,
-            labled_songs,
-            recommendation_count
+            average_song_cluster_label[0],
+            labled_songs_df,
+            recommendation_count,
+            spotipy_obj
         )
-        
-        # similar_songs_audio_features = get_songs_audio_features(similar_song_id_list)
-        # output_df = similar_songs_to_df(similar_songs_audio_features)
 
-        # return output_df
+        output_df = get_songs_audio_features(similar_song_id_list, spotipy_obj)
+
+        return output_df
 
     return main(song_id_list, recommendation_count)
 
@@ -118,8 +117,8 @@ if __name__ == "__main__":
         "7FGq80cy8juXBCD2nrqdWU",
         "20hsdn8oITBsuWNLhzr5eh",
         "7fPuWrlpwDcHm5aHCH5D9t",
+        "67O8CWXxPsfz8orZVGMQwf",
         "2BOqDYLOJBiMOXShCV1neZ",
-        "67O8CWXxPsfz8orZVGMQwf"
     ]
 
-    predict(song_id_list, 5)
+    print(predict(song_id_list, 5))
